@@ -42,7 +42,9 @@ import playerService from './database/PlayerService';
 import matchService from './database/MatchService';
 import statsService from './database/StatsService';
 import importExportService from './database/ImportExportService';
-import type { DBPlayer, DBMatch, DBMatchPlayer, ExportData } from './database/models';
+import validationService from './database/ValidationService';
+import matchMakingService from './database/MatchMakingService';
+import type { DBPlayer, DBMatch, DBMatchPlayer, ExportData, ValidationResult } from './database/models';
 
 /**
  * DatabaseService facade for backward compatibility
@@ -262,6 +264,124 @@ class DatabaseService {
     updates: Partial<DBMatchPlayer>;
   }>): Promise<void> {
     return matchService.updateMatchPlayers(updates);
+  }
+  /**
+   * Get the database instance
+   */
+  getDatabase(): IDBDatabase | null {
+    return databaseCore.getDatabase();
+  }
+
+  /**
+   * Clear all data from the database
+   */
+  async clearAllData(): Promise<boolean> {
+    return databaseCore.clearAllData();
+  }
+
+  /**
+   * Delete a player by ID (only if they have no recorded matches)
+   * Returns true if successfully deleted, false otherwise
+   */
+  async deletePlayer(playerId: string): Promise<boolean> {
+    return playerService.deletePlayer(playerId);
+  }
+
+  /**
+   * Create a new player with default values
+   */
+  async createPlayer(playerId: string, playerName: string): Promise<DBPlayer> {
+    return playerService.createPlayer(playerId, playerName);
+  }
+
+  /**
+   * Get player statistics including favorite heroes and roles
+   */
+  async getPlayerStats(playerId: string): Promise<{
+    player: DBPlayer | null;
+    favoriteHeroes: { heroId: number, heroName: string, count: number }[];
+    allHeroesPlayed: { heroId: number, heroName: string, count: number }[];
+    favoriteRoles: { role: string, count: number }[];
+    allRolesPlayed: { role: string, count: number }[];
+    matchesPlayed: DBMatchPlayer[];
+  }> {
+    return statsService.getPlayerStats(playerId);
+  }
+
+  /**
+   * Get current TrueSkill ratings calculated fresh from all match history
+   */
+  async getCurrentTrueSkillRatings(): Promise<{ [playerId: string]: number }> {
+    return statsService.getCurrentTrueSkillRatings();
+  }
+
+  /**
+   * Validate match edit data before saving
+   */
+  validateMatchEdit(matchData: DBMatch, playersData: DBMatchPlayer[]): ValidationResult {
+    return validationService.validateMatchEdit(matchData, playersData);
+  }
+
+  /**
+   * Validate a new match before recording
+   */
+  validateNewMatch(
+    matchData: {
+      date: Date;
+      winningTeam: Team;
+      gameLength: GameLength;
+      doubleLanes: boolean;
+    },
+    playerData: {
+      id: string;
+      team: Team;
+      heroId: number;
+      heroName: string;
+      heroRoles: string[];
+      kills?: number;
+      deaths?: number;
+      assists?: number;
+      goldEarned?: number;
+      minionKills?: number;
+      level?: number;
+    }[]
+  ): ValidationResult {
+    return validationService.validateNewMatch(matchData, playerData);
+  }
+
+  /**
+   * Calculate predicted win probability using TrueSkill ratings
+   */
+  async calculateWinProbability(team1Players: string[], team2Players: string[]): Promise<number> {
+    return matchMakingService.calculateWinProbability(team1Players, team2Players);
+  }
+
+  /**
+   * Calculate predicted win probability with confidence intervals
+   */
+  async calculateWinProbabilityWithCI(team1Players: string[], team2Players: string[]): Promise<{
+    team1Probability: number;
+    team1Lower: number;
+    team1Upper: number;
+    team2Probability: number;
+    team2Lower: number;
+    team2Upper: number;
+  }> {
+    return matchMakingService.calculateWinProbabilityWithCI(team1Players, team2Players);
+  }
+
+  /**
+   * Generate balanced teams based on skill ratings
+   */
+  async generateBalancedTeams(playerIds: string[]): Promise<{ team1: string[], team2: string[] }> {
+    return matchMakingService.generateBalancedTeams(playerIds);
+  }
+
+  /**
+   * Generate balanced teams based on gameplay experience (total games)
+   */
+  async generateBalancedTeamsByExperience(playerIds: string[]): Promise<{ team1: string[], team2: string[] }> {
+    return matchMakingService.generateBalancedTeamsByExperience(playerIds);
   }
 }
 
