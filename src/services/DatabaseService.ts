@@ -1,5 +1,5 @@
 // src/services/DatabaseService.ts
-// This file serves as a facade for the refactored database services
+// This file serves as a facade for the Firebase database services
 
 import { Team, GameLength } from '../types';
 
@@ -27,28 +27,28 @@ export type {
 export { generateUUID, getDeviceId } from './database/utils';
 
 // Re-export all services
-export { default as databaseCore } from './database/DatabaseCore';
-export { default as playerService, getDisplayRating } from './database/PlayerService';
-export { default as matchService } from './database/MatchService';
-export { default as statsService } from './database/StatsService';
-export { default as importExportService } from './database/ImportExportService';
-export { default as validationService } from './database/ValidationService';
-export { default as matchMakingService } from './database/MatchMakingService';
+export { default as databaseCore } from './firebase/FirebaseDatabaseCore';
+export { default as playerService, getDisplayRating } from './firebase/FirebasePlayerService';
+export { default as matchService } from './firebase/FirebaseMatchService';
+export { default as statsService } from './firebase/FirebaseStatsService';
+export { default as importExportService } from './firebase/FirebaseImportExportService';
+export { default as validationService } from './firebase/FirebaseValidationService';
+export { default as matchMakingService } from './firebase/FirebaseMatchMakingService';
 
 // For backwards compatibility, create a DatabaseService class that provides
-// the same interface as the original but delegates to the new services
-import databaseCore from './database/DatabaseCore';
-import playerService from './database/PlayerService';
-import matchService from './database/MatchService';
-import statsService from './database/StatsService';
-import importExportService from './database/ImportExportService';
-import validationService from './database/ValidationService';
-import matchMakingService from './database/MatchMakingService';
+// the same interface as the original but delegates to the Firebase services
+import databaseCore from './firebase/FirebaseDatabaseCore';
+import playerService from './firebase/FirebasePlayerService';
+import matchService from './firebase/FirebaseMatchService';
+import statsService from './firebase/FirebaseStatsService';
+import importExportService from './firebase/FirebaseImportExportService';
+import validationService from './firebase/FirebaseValidationService';
+import matchMakingService from './firebase/FirebaseMatchMakingService';
 import type { DBPlayer, DBMatch, DBMatchPlayer, ExportData, ValidationResult } from './database/models';
 
 /**
  * DatabaseService facade for backward compatibility
- * This class delegates to the refactored services in the database folder
+ * This class delegates to the Firebase services
  */
 class DatabaseService {
   /**
@@ -268,7 +268,7 @@ class DatabaseService {
   /**
    * Get the database instance
    */
-  getDatabase(): IDBDatabase | null {
+  getDatabase(): any {
     return databaseCore.getDatabase();
   }
 
