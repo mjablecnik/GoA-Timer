@@ -3,3 +3,6 @@ dist
 claude/
 CLAUDE.md
 Issues.md
+
+firebase-config.ts
+.idea/
