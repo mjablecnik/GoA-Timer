@@ -67,9 +67,10 @@ const PlayerNameInput: React.FC<PlayerNameInputProps> = ({
     setHighlightedIndex(-1);
   }, [inputValue, suggestedNames, showSuggestions]);
   
-  // Function to validate if the input contains only allowed characters (alphanumeric, spaces, periods, hyphens)
+  // Function to validate if the input contains only allowed characters (including special characters and diacritics)
   const isValidInput = (input: string): boolean => {
-    return /^[a-zA-Z0-9 .-]*$/.test(input);
+    // Allow all Unicode letters, numbers, spaces, periods, hyphens, and diacritics
+    return /^[\p{L}\p{N} .-]*$/u.test(input);
   };
   
   // Handle input change with validation
@@ -288,7 +289,7 @@ const PlayerNameInput: React.FC<PlayerNameInputProps> = ({
       {/* Show invalid character warning */}
       {showInvalidWarning && (
         <div className="text-amber-500 text-xs mt-1">
-          Only letters, numbers, spaces, periods, and hyphens are allowed
+          Only letters (including accented characters), numbers, spaces, periods, and hyphens are allowed
         </div>
       )}
       
