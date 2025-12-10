@@ -99,14 +99,13 @@ const GameSetup: React.FC<GameSetupProps> = ({
     // we can just call the async check but don't need to store the result
     dbService.hasMatchData();
     
-    // Load player names from database - ONLY players who have played games
+    // Load all player names from database for autocomplete
     const loadPlayerNames = async () => {
       try {
         const allPlayers = await dbService.getAllPlayers();
         // Extract unique player names and sort them alphabetically
-        // ONLY include players who have match history (totalGames > 0)
+        // Include all players for autocomplete
         const playerNames = allPlayers
-          .filter(player => player.totalGames > 0)
           .map(player => player.name)
           .filter((name, index, self) => self.indexOf(name) === index)
           .sort();

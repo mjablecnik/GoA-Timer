@@ -52,17 +52,20 @@ const PlayerNameInput: React.FC<PlayerNameInputProps> = ({
   // Filter suggestions based on input
   useEffect(() => {
     if (inputValue.trim()) {
-      const filtered = suggestedNames.filter(name => 
+      const filtered = suggestedNames.filter(name =>
         name.toLowerCase().includes(inputValue.toLowerCase())
       );
       setFilteredSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
-      // Reset highlighted index when suggestions change
-      setHighlightedIndex(-1);
+    } else if (showSuggestions) {
+      // If input is empty but suggestions should be shown (e.g., on focus),
+      // show first 5 suggestions
+      setFilteredSuggestions(suggestedNames.slice(0, 5));
     } else {
       setFilteredSuggestions([]);
-      setHighlightedIndex(-1);
     }
-  }, [inputValue, suggestedNames]);
+    // Reset highlighted index when suggestions change
+    setHighlightedIndex(-1);
+  }, [inputValue, suggestedNames, showSuggestions]);
   
   // Function to validate if the input contains only allowed characters (alphanumeric, spaces, periods, hyphens)
   const isValidInput = (input: string): boolean => {
@@ -116,7 +119,12 @@ const PlayerNameInput: React.FC<PlayerNameInputProps> = ({
   
   // Handle focus event
   const handleFocus = () => {
-    if (inputValue && suggestedNames.length > 0) {
+    // Show suggestions when input is focused, even if empty
+    if (suggestedNames.length > 0) {
+      // If input is empty, show all suggestions (limited to 5)
+      if (!inputValue.trim()) {
+        setFilteredSuggestions(suggestedNames.slice(0, 5));
+      }
       setShowSuggestions(true);
     }
   };
