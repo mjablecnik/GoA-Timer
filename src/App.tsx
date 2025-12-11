@@ -448,8 +448,8 @@ function AppContent() {
   const [showVictoryScreen, setShowVictoryScreen] = useState<boolean>(false);
   const [victorTeam, setVictorTeam] = useState<Team | null>(null);
   
-  // NEW: Match statistics states
-  const [showMatchStatistics, setShowMatchStatistics] = useState<boolean>(false);
+  // NEW: Match statistics states - default to showing match statistics first
+  const [showMatchStatistics, setShowMatchStatistics] = useState<boolean>(true);
   const [currentMatchView, setCurrentMatchView] = useState<MatchesView>('menu');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   
@@ -539,7 +539,10 @@ function AppContent() {
           
           setSavedGameData(savedGame);
           setSavedGameDate(formattedDate);
-          setShowResumePrompt(true);
+          // Only show resume prompt if we're not in match statistics view
+          if (!showMatchStatistics) {
+            setShowResumePrompt(true);
+          }
         }
       } catch (error) {
         console.error('App initialization error:', error);
@@ -551,7 +554,7 @@ function AppContent() {
     if (!gameStarted && !isDraftingMode) {
       initializeApp();
     }
-  }, [gameStarted, isDraftingMode]);
+  }, [gameStarted, isDraftingMode, showMatchStatistics]);
 
   // Attempt to unlock audio on first user interaction
   useEffect(() => {
@@ -1692,7 +1695,7 @@ const handleSavePlayerStats = (roundStats: { [playerId: number]: PlayerRoundStat
     setCurrentMatchView(view);
   };
   
-  // NEW: Handle back from match statistics
+  // Handle back from match statistics - navigate to game setup
   const handleBackFromMatchStatistics = () => {
     setShowMatchStatistics(false);
   };
